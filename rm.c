@@ -74,12 +74,11 @@ int main(int argc, char *argv[])
 	}
 
 	ret = _rm(argv[1]);
-	/* ret = remove(argv[1]); */
-	/* if (ret) { */
-	/* 	printf("%s: cannot remove '%s': %s\n", */
-	/* 	       argv[0], argv[1], strerror(errno)); */
-	/* 	return -1; */
-	/* } */
+	if (ret) {
+		printf("%s: cannot remove '%s': %s\n",
+		       argv[0], argv[1], strerror(errno));
+		return -1;
+	}
 
 	return 0;
 }
