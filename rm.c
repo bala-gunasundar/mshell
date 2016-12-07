@@ -15,11 +15,27 @@ int _rm(const char *path)
 	size_t path_len;
 	size_t file_len;
 	char *file;
-	struct stat fstat;
+	struct stat sb;
+
+	ret = stat(path, &sb);
+	if (ret == -1) {
+		printf("stat: %s: %s\n", path, strerror(errno));
+		return -1;
+	}
+
+	/* path is a regular file */
+	if ((sb.st_mode & S_IFMT) == S_IFREG) {
+		ret = unlink(path);
+		if (ret == -1) {
+			printf("unlink error: %s: %s\n", path, strerror(errno));
+			return -1;
+		}
+		return 0;
+	}
 
 	d = opendir(path);
 	if (!d) {
-		printf(": %s: %s\n", path, strerror(errno));
+		printf("_rm: %s: %s\n", path, strerror(errno));
 		return -1;
 	}
 
@@ -44,11 +60,11 @@ int _rm(const char *path)
 
 		snprintf(file, file_len, "%s/%s", path, p->d_name);
 
-		if (stat(file, &fstat)) {
+		if (stat(file, &sb)) {
 			printf("stat: %s: %s\n", file, strerror(errno));
 			return -1;
 		}
-		if (S_ISDIR(fstat.st_mode))
+		if (S_ISDIR(sb.st_mode))
 			ret = _rm(file);
 		else
 			ret = unlink(file);
